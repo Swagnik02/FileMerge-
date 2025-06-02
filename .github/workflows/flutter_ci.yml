@@ -36,13 +36,6 @@ jobs:
           channel: stable
           architecture: x64
 
-      - name: Cache Flutter Pub packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.pub-cache
-          key: pub-cache-${{ hashFiles('**/pubspec.yaml') }}
-          restore-keys: pub-cache-
-
       - run: flutter --version
 
       - run: flutter pub get
