@@ -1,0 +1,61 @@
+name: Flutter CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build & Release
+    runs-on: windows-latest # Use Windows runner for building .exe
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Flutter SDK
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.FLUTTER_ROOT }}
+          key: flutter-sdk-${{ runner.os }}-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: |
+            flutter-sdk-${{ runner.os }}-
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          architecture: x64
+
+      - name: Cache Flutter Pub packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.pub-cache
+          key: pub-cache-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: pub-cache-
+
+      - run: flutter --version
+
+      - run: flutter pub get
+
+      - name: Enable Windows desktop support
+        run: flutter config --enable-windows-desktop
+
+      - name: Build Windows EXE
+        run: flutter build windows --release
+
+      - name: Upload Windows EXE to Release
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          artifacts: "build/windows/runner/Release/*"
+          tag: v1.0.${{ github.run_number }}
+          token: ${{ secrets.TOKEN }}
