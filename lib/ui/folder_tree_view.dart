@@ -135,6 +135,7 @@ class _FolderTreeViewState extends State<FolderTreeView> {
           final newValue = !isChecked;
           checked[entity.path] = newValue;
           if (!isFile) _toggleFolderChildren(entity.path, newValue);
+          _toggleExpansion(entity.path);
         });
       },
       child: Padding(
